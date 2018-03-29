@@ -1,15 +1,19 @@
 import React, {Component} from 'react';
-import Counter from './Counter';
 
 class Product extends Component{
 	constructor(props){
 		super(props);
         this.state = {
             selectedProduct: {},
-            quickViewProdcut: {},
-            isAdded: false
+            quickViewProduct: {},
+            isAdded: false || props.isAdded
         }
     }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({isAdded: nextProps.isAdded});
+    }
+
     addToCart(image, name, price, id, quantity){
         this.setState({
             selectedProduct: {
@@ -27,7 +31,6 @@ class Product extends Component{
         }, function(){
             setTimeout(() => {
                 this.setState({
-                    isAdded: false,
                     selectedProduct: {} 
                 });
             }, 3500);
@@ -35,14 +38,14 @@ class Product extends Component{
     }
     quickView(image, name, price, id){
         this.setState({
-            quickViewProdcut: {
+            quickViewProduct: {
                 image: image,
                 name: name,
                 price: price,
                 id: id
             }
         }, function(){
-            this.props.openModal(this.state.quickViewProdcut);
+            this.props.openModal(this.state.quickViewProduct);
         })
     }
     render(){
@@ -59,7 +62,7 @@ class Product extends Component{
                 <h4 className="product-name">{this.props.name}</h4>
                 <p className="product-price">{this.props.price}</p>
                 <div className="product-action">
-                    <button className={!this.state.isAdded ? "" : "added"} type="button" onClick={this.addToCart.bind(this, image, name, price, id, quantity)}>{!this.state.isAdded ? "ADD TO CART" : "✔ ADDED"}</button>
+                    <button className={!this.state.isAdded ? "" : "added"} type="button" onClick={this.addToCart.bind(this, image, name, price, id, quantity)} disabled={this.state.isAdded}>{!this.state.isAdded ? "ADD TO CART" : "✔ ADDED"}</button>
                 </div>
             </div>
         )

@@ -1,10 +1,13 @@
 import React, {Component} from 'react';
 import CartScrollBar from './CartScrollBar';
-import Counter from './Counter';
 import EmptyCart from '../empty-states/EmptyCart';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import {findDOMNode} from 'react-dom';
-
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
+import getWeb3 from '../utils/getWeb3'
+import { getStore } from '../utils/getContracts'
+import _ from 'lodash';
 class Header extends Component{
     constructor(props){
         super(props);
@@ -56,6 +59,18 @@ class Header extends Component{
     componentWillUnmount() {
       document.removeEventListener('click', this.handleClickOutside.bind(this), true);
     }
+
+     checkOut = () => {
+        const total = _.reduce(_.map(this.props.cartItems, 'price'), (sum, item) => sum + Number(item), 0);
+        getStore().then(_store => {
+            _store.deployed()
+                .then((instance) => {
+                    instance.checkoutCart({from: this.props.selectedAccount, value: total});
+                });
+        })
+    }
+    
+    
     render(){
         let cartItems;
         cartItems = this.state.cart.map(product =>{
@@ -81,7 +96,14 @@ class Header extends Component{
 			view = <CSSTransitionGroup transitionName="fadeIn" transitionEnterTimeout={500} transitionLeaveTimeout={300} component="ul" className="cart-items">{cartItems}</CSSTransitionGroup>
 		}
         return(
-            <header>
+            <header >
+                <Select
+                    style={{width: 150}}
+                    name="form-field-name"
+                    value={this.props.selectedAccount}
+                    onChange={this.props.onAcccountChanged}
+                    options={this.props.accounts}
+                />
                 <div className="container">
                     <div className="brand">
                         <h2> CryptoStore </h2>
@@ -121,7 +143,7 @@ class Header extends Component{
                                 {view}
                             </CartScrollBar>
                             <div className="action-block">
-                                <button type="button" className={this.state.cart.length > 0 ? " " : "disabled"}>PROCEED TO CHECKOUT</button>
+                                <button type="button" className={this.state.cart.length > 0 ? " " : "disabled"} onClick={this.checkOut}>PROCEED TO CHECKOUT</button>
                             </div>
                         </div>
                     </div>

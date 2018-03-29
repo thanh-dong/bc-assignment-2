@@ -7,13 +7,7 @@ class LoadingProducts extends Component {
 			<div className="products loading">
                 <Product />
                 <Product />
-                <Product />
-                <Product />
-                <Product />
-                <Product />
-                <Product />
-                <Product />
-            </div>
+                <Product />            </div>
 		)
 	}
 }

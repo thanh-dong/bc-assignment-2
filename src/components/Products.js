@@ -11,14 +11,25 @@ import {
 	NavLink} from 'reactstrap';
 
 import AddProduct from './AddProduct'
+import { connect } from 'react-redux';
+
+const mapStateToProps = (state) => {
+	return {
+		productsList: state.product.list,
+		owner: state.user.owner
+	};
+}
 
 class Products extends Component{
 	state = {
 		page: 'home'
 	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return nextState !== this.state || nextProps.cart.length !== this.props.cart.length || nextProps.productsList.length !== this.props.productsList.length || nextProps.selectedAccount !== this.props.selectedAccount
+	}
 
-
-  	render(){
+  	render() {
+		const {productsList = []} = this.props;
 		const onNavBarClick = (page) => this.setState({page})
     	let productsData;
     	let term = this.props.searchTerm;
@@ -28,9 +39,9 @@ class Products extends Component{
 				return x.name.toLowerCase().includes(term.toLowerCase()) || !term;
 			}
 		}
-		productsData = this.props.productsList.filter(searchingFor(term)).map(product =>{
+		productsData = productsList.filter(searchingFor(term)).map(product =>{
 			return(
-						<Product key={product.id} price={product.price} name={product.name} image={product.image} id={product.id} addToCart={this.props.addToCart} productQuantity={this.props.productQuantity} updateQuantity={this.props.updateQuantity} openModal={this.props.openModal}/>
+					<Product key={product.id} price={product.price} name={product.name} image={product.image} id={product.id} addToCart={this.props.addToCart} productQuantity={this.props.productQuantity} updateQuantity={this.props.updateQuantity} openModal={this.props.openModal} isAdded={this.props.cart.findIndex((x => x.id === product.id)) > 0}/>
 				)
 			}
 		);
@@ -70,9 +81,9 @@ class Products extends Component{
 							<NavItem>
 								<NavLink active={this.state.page === 'home'} onClick={() => onNavBarClick('home')}>Home</NavLink>
 							</NavItem>
-							<NavItem>
+							{this.props.owner === this.props.selectedAccount && <NavItem>
 								<NavLink active={this.state.page === 'addProduct'} onClick={() => onNavBarClick('addProduct')}>Add Product</NavLink>
-							</NavItem>
+							</NavItem>}
 							<NavItem>
 								<NavLink active={this.state.page === 'order'} onClick={() => onNavBarClick('order')}>Orders</NavLink>
 							</NavItem>
@@ -85,4 +96,4 @@ class Products extends Component{
 	}
 }
 
-export default Products;
+export default connect(mapStateToProps)(Products);
