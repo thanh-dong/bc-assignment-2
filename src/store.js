@@ -18,6 +18,11 @@ export const ownerLoaded = (address) => ({
   data: address
 });
 
+export const orderCreated = (data) => ({  
+  type: 'ORDER_CREATED',
+  data: data
+});
+
 // reducers.js
 export const product = (state = {list: []}, action) => {  
   switch (action.type) {
@@ -32,6 +37,19 @@ export const product = (state = {list: []}, action) => {
       return state;
   }
 };
+
+export const order = (state = {}, action) => {  
+  switch (action.type) {
+    case 'ORDER_CREATED':
+      const orders = state[action.data.owner] || [];
+      const newState = {};
+      newState[action.data.owner] = _.concat(orders, [action.data.order]);
+      return _.assign(state, newState);
+    default:
+      return state;
+  }
+};
+
 export const user = (state = {owner: ''}, action) => {  
   switch (action.type) {
     case 'OWNER_LOADED':
@@ -43,7 +61,8 @@ export const user = (state = {owner: ''}, action) => {
 
 export const reducers = combineReducers({  
   product,
-  user
+  user,
+  order
 });
 
 // store.js

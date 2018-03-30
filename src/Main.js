@@ -32,6 +32,7 @@ class Main extends Component {
 		this.openModal = this.openModal.bind(this);
 		this.closeModal = this.closeModal.bind(this);
 		this.onAcccountChanged = this.handleChange.bind(this);
+		this.clearCart = this.clearCart.bind(this);
 	}
 	// Search by Keyword
 	handleSearch(event) {
@@ -132,6 +133,11 @@ class Main extends Component {
 		this.setState({ selectedAccount: value });
     }
 
+	clearCart = () => {
+		this.setState({cart: []});
+		this.sumTotalItems(this.state.cart);
+		this.sumTotalAmount(this.state.cart);
+	}
 	render() {
 		return (
 			<div className="container">
@@ -150,6 +156,7 @@ class Main extends Component {
 					accounts={this.props.accounts}
 					onAcccountChanged={this.handleChange}
 					selectedAccount={this.state.selectedAccount}
+					clearCart={this.clearCart}
 				/>
 				<Products
 					searchTerm={this.state.term}

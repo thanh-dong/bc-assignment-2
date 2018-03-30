@@ -11,6 +11,7 @@ import {
 	NavLink} from 'reactstrap';
 
 import AddProduct from './AddProduct'
+import Orders from './Orders'
 import { connect } from 'react-redux';
 
 const mapStateToProps = (state) => {
@@ -41,7 +42,7 @@ class Products extends Component{
 		}
 		productsData = productsList.filter(searchingFor(term)).map(product =>{
 			return(
-					<Product key={product.id} price={product.price} name={product.name} image={product.image} id={product.id} addToCart={this.props.addToCart} productQuantity={this.props.productQuantity} updateQuantity={this.props.updateQuantity} openModal={this.props.openModal} isAdded={this.props.cart.findIndex((x => x.id === product.id)) > 0}/>
+					<Product key={product.id} price={product.price} name={product.name} image={product.image} id={product.id} addToCart={this.props.addToCart} productQuantity={this.props.productQuantity} updateQuantity={this.props.updateQuantity} openModal={this.props.openModal}/>
 				)
 			}
 		);
@@ -69,7 +70,7 @@ class Products extends Component{
 			} else if (this.state.page === 'addProduct') {
 				return <AddProduct />
 			} else if (this.state.page === 'order') {
-				return undefined
+				return <Orders account={this.props.selectedAccount}/>
 			}
 		}
 

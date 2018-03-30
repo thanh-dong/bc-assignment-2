@@ -8,6 +8,8 @@ import 'react-select/dist/react-select.css';
 import getWeb3 from '../utils/getWeb3'
 import { getStore } from '../utils/getContracts'
 import _ from 'lodash';
+import {store, orderCreated} from '../store'
+
 class Header extends Component{
     constructor(props){
         super(props);
@@ -54,23 +56,46 @@ class Header extends Component{
         } 
     }
     componentDidMount() {
-      document.addEventListener('click', this.handleClickOutside.bind(this), true);
+        document.addEventListener('click', this.handleClickOutside.bind(this), true);
+		getStore().then(st => 
+			st.deployed()
+      		.then((instance) => {
+				instance.CartCheckoutCompleted().watch((error, result) => {
+					if (!error) {
+						const data = {
+                            owner: result.args.customer,
+                            order: {
+                                value: result.args.paymentSum.toString(),
+                                escrow: result.args.escrow,
+                                status: result.args.status,
+                            }
+                        };
+						store.dispatch(orderCreated(data));
+					}
+				});
+			})
+		);
     }
     componentWillUnmount() {
       document.removeEventListener('click', this.handleClickOutside.bind(this), true);
     }
 
-     checkOut = () => {
+    componentWillReceiveProps(nextProps) {
+        this.setState({cart: nextProps.cartItems});
+    }
+
+    checkOut = async () => {
         const total = _.reduce(_.map(this.props.cartItems, 'price'), (sum, item) => sum + Number(item), 0);
         getStore().then(_store => {
             _store.deployed()
                 .then((instance) => {
-                    instance.checkoutCart({from: this.props.selectedAccount, value: total});
+                    instance.checkoutCart({from: this.props.selectedAccount, value: total,  gas: 3000000});
+                    this.props.clearCart();
+                    this.setState({cart: []})
                 });
         })
     }
-    
-    
+
     render(){
         let cartItems;
         cartItems = this.state.cart.map(product =>{

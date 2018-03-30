@@ -34,13 +34,13 @@ contract Store {
     struct Order {
         // uint256[] products;
         uint256 completeSum;
-        Escrow escrow;
+        address escrow;
     }
     event CustomerRegistered(address customer);
     event ProductAdded(uint256 productId, string name, string category, string imageLink, string description, uint price);
     event CartProductInserted(address customer, uint256 prodId, uint256 prodPrice, uint256 completeSum);
     event CartProductRemoved(address customer, uint256 prodId);
-    event CartCheckoutCompleted(address customer, uint256 paymentSum);
+    event CartCheckoutCompleted(address customer, uint256 paymentSum, address escrow, string status);
     event CartEmptied(address customer);
     event OrderCreated(address customer, uint256 orderNumber);
     event OrderConfirm(address customer, string status);
@@ -109,14 +109,11 @@ contract Store {
         return (false, 0);
     }
 
-    function checkoutCart(uint256 _completeSum) public returns (bool success) {
-        if ((msg.sender.balance >= _completeSum)) {
-            orders[msg.sender].push(Order(_completeSum, (new Escrow).value(_completeSum)(msg.sender, owner, escrowOwner)));
-            orderNumber++;
-            CartCheckoutCompleted(msg.sender, _completeSum);
-            return true;
-        }
-        return false;
+    function checkoutCart() public payable{
+        address escrow = address(((new Escrow).value(msg.value)(msg.sender, owner, escrowOwner)));
+        orders[msg.sender].push(Order(msg.value, escrow));
+        orderNumber++;
+        CartCheckoutCompleted(msg.sender, msg.value, escrow, "open");
     }
 
 

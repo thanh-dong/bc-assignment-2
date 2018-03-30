@@ -21,9 +21,9 @@ class App extends Component {
     getWeb3
       .then(results => 
         results.web3.eth.getAccounts((error, accounts) => {
-          this.setState({
-              accounts: _.map(accounts, (account) => ({label: account, value: account}))
-            });
+          const _accounts = _.map(accounts, (account) => ({label: account, value: account}))
+          _accounts[0].label = 'Store Owner';
+          this.setState({accounts: _accounts});
           _store.deployed()
                 .then((instance) => {
                   instance.connectEscrowOwner(accounts[1], { from: ownerAccount });
@@ -33,26 +33,28 @@ class App extends Component {
         console.log('Error finding web3.')
       });
 
-      getStore().then(st =>
-        st.deployed()
-          .then((instance) =>
-            instance.getProductCount.call().then(count => {
-              for (let i = 0; i < count.toNumber(); i++) {
-                instance.getProduct.call(i).then(data => {
-                  store.dispatch(productAdded({
-                    id: i,
-                    name: data[0],
-                    category: data[1],
-                    image: `http://127.0.0.1:8080//ipfs/${data[2]}`,
-                    description: data[3],
-                    price: data[4].toNumber(),
-                    status: data[5].toNumber()
-                  }))
-                }
-                )
+    getStore().then(st =>
+      st.deployed()
+        .then((instance) => {
+          instance.getProductCount.call().then(count => {
+            for (let i = 0; i < count.toNumber(); i++) {
+              instance.getProduct.call(i).then(data => {
+                store.dispatch(productAdded({
+                  id: i,
+                  name: data[0],
+                  category: data[1],
+                  image: `http://127.0.0.1:8080//ipfs/${data[2]}`,
+                  description: data[3],
+                  price: data[4].toNumber(),
+                  status: data[5].toNumber()
+                }))
               }
-            }))
-      );
+              )
+            }
+          });
+        }
+      )
+    );
   }
 
   render() {
